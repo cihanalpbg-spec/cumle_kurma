@@ -268,17 +268,62 @@ body {
   letter-spacing: 0.5px;
 }
 
+.phonetics-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 .phonetics {
   color: var(--text-muted);
   font-size: 13px;
   font-style: italic;
 }
 
+.tr-phonetics {
+  color: var(--secondary);
+  font-size: 11px;
+  background: rgba(0, 242, 254, 0.07);
+  border: 1px solid rgba(0, 242, 254, 0.15);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.info-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
+  padding-top: 8px;
+}
+
+.info-section label {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
 .meaning {
   font-size: 14px;
   color: var(--text-main);
   line-height: 1.5;
-  margin-top: 4px;
+  font-weight: 500;
+}
+
+.usage-note {
+  font-size: 12.5px;
+  color: #c9d2de;
+  line-height: 1.55;
+  background: rgba(127, 0, 255, 0.03);
+  padding: 8px 12px;
+  border-radius: 8px;
+  border-left: 3px solid var(--primary);
+  margin-top: 2px;
 }
 
 .card-footer-actions {
@@ -674,6 +719,34 @@ body {
 
 .sentence-ai-analysis strong {
   color: var(--secondary);
+}
+
+.sentence-vocab-block {
+  background: rgba(245, 158, 11, 0.03);
+  border: 1px dashed rgba(245, 158, 11, 0.2);
+  border-radius: 10px;
+  padding: 10px 16px;
+  margin-top: 8px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #e5e7eb;
+}
+
+.sentence-vocab-block strong {
+  color: var(--color-medium);
+}
+
+.vocab-item-tag {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-color);
+  padding: 2px 8px;
+  border-radius: 6px;
+  margin: 2px 4px;
+}
+
+.vocab-item-tag strong {
+  color: #fff;
 }
 
 /* Welcome Screen Styling */
@@ -1092,3 +1165,180 @@ input[type="range"]::-webkit-slider-thumb:active {
     height: calc(100vh - 170px);
   }
 }
+
+/* --- View Panel Layout --- */
+.view-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.view-panel.hidden {
+  display: none !important;
+}
+
+/* --- Navigation Modes --- */
+.nav-modes {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 16px 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 12px;
+}
+
+.nav-mode-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-muted);
+  padding: 10px 14px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  font-family: var(--font-family-title);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.nav-mode-btn svg {
+  flex-shrink: 0;
+}
+
+.nav-mode-btn:hover {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-main);
+}
+
+.nav-mode-btn.active {
+  background: rgba(0, 242, 254, 0.08);
+  border: 1px solid rgba(0, 242, 254, 0.15);
+  color: var(--secondary);
+}
+
+/* --- Conversation Practice Screen --- */
+.conv-categories-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 12px 24px;
+  background: rgba(255, 255, 255, 0.01);
+  border-bottom: 1px solid var(--border-color);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.conv-categories-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.conv-cat-tab {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-family: var(--font-family-title);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.conv-cat-tab:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-main);
+}
+
+.conv-cat-tab.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+  box-shadow: 0 4px 12px var(--primary-glow);
+}
+
+.conv-phrase-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 14px 20px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  transition: all 0.2s ease;
+  animation: slideUp 0.25s ease-out;
+}
+
+.conv-phrase-card:hover {
+  background: rgba(255, 255, 255, 0.04);
+  transform: translateX(4px);
+}
+
+.conv-phrase-content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.conv-phrase-eng {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.conv-phrase-tr {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+/* --- Turkish Word Usages Layout --- */
+.usage-group-card {
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  margin-bottom: 24px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  animation: slideUp 0.3s ease-out;
+}
+
+.usage-group-header {
+  background: rgba(127, 0, 255, 0.04);
+  border-bottom: 1px solid var(--border-color);
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.usage-eng-word {
+  font-family: var(--font-family-title);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--secondary);
+}
+
+.usage-tr-context {
+  font-size: 14px;
+  color: var(--text-muted);
+  font-weight: 500;
+  font-style: italic;
+}
+
+.usage-sentences-list {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+

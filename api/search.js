@@ -26,27 +26,53 @@ export default async function handler(req, res) {
 
   // Create prompt to force Gemini to build graded sentences with Turkish translation and analysis
   const prompt = `You are an expert English language teacher and curriculum developer.
-The student wants to learn the English word "${word}".
-Generate exactly 3 sentences for each level of proficiency:
-1. "simple" (A1-A2 level: simple vocabulary, short sentences).
-2. "medium" (B1-B2 level: coordinate/subordinate clauses, intermediate vocabulary).
-3. "academic" (C1-C2 level: complex sentence structures, advanced grammar like passive voice, relative clauses, subjunctive, and academic vocabulary/conjunctions).
+The student wants to learn about the word "${word}".
 
-Each sentence must contain the target word "${word}" (or its inflected forms like plural/tense change if natural, but keep the word highlighted).
-For the "academic" sentences, please make sure the sentence is truly academic, formal, and complex, demonstrating advanced syntactic structures (e.g. inversion, nominal clauses, participle clauses) and academic context (e.g., research, analysis, literature).
+First, determine if "${word}" is a Turkish word or an English word.
 
-For each sentence, provide:
-1. "eng": The English sentence.
-2. "tr": The Turkish translation.
-3. "analysis": A very brief grammatical breakdown in Turkish showing the key structures (e.g. "Relative clause (which) ve edilgen yapı kullanılmıştır").
+--- CASE 1: The input is a TURKISH word (e.g., "kalmak", "ayırmak", "almak") ---
+If the word is Turkish, set "isTurkishInput" to true in your response.
+A Turkish word can have multiple distinct meanings/usages in English depending on context.
+Identify the main semantic usages (usually 2 to 4 key usages).
+For example:
+- "kalmak":
+  - Usage 1: stay / remain (Bir yerde kalmak / konaklamak) -> 5 sentences.
+  - Usage 2: fail (Sınavda/Sınıfta kalmak) -> 5 sentences.
+  - Usage 3: linger / persist (Akılda kalmak / kalıcı olmak) -> 3 sentences.
+- "ayırmak":
+  - Usage 1: separate / divide / split (Fiziksel olarak bölmek/ayırmak) -> 5 sentences.
+  - Usage 2: distinguish / differentiate (Fikirsel/Zihinsel olarak ayırt etmek) -> 5 sentences.
+  - Usage 3: reserve / set aside (Başka kullanım amacı: yer ayırtmak, para ayırmak vb.) -> 5 sentences.
 
-Output MUST be a raw JSON object matching this schema:
-{
-  "simple": [{"eng": "...", "tr": "...", "analysis": "..."}],
-  "medium": [{"eng": "...", "tr": "...", "analysis": "..."}],
-  "academic": [{"eng": "...", "tr": "...", "analysis": "..."}]
-}
-Do not write markdown block. Return only the raw JSON.`;
+For each identified usage of the Turkish word, provide:
+- "englishWord": The primary English translation word(s) representing this usage (e.g. "stay / remain").
+- "contextName": Brief Turkish description of this usage context (e.g. "Bir yerde kalmak / konaklamak").
+- "sentences": A list of example sentences illustrating this usage.
+  - For major usages, generate exactly 5 sentences.
+  - For minor or abstract usages, generate exactly 3 sentences.
+  - Mix English levels (Simple, Medium, Academic) naturally across these sentences.
+  - For each sentence, provide:
+    - "eng": The English sentence.
+    - "tr": The Turkish translation.
+    - "analysis": Brief grammar breakdown in Turkish.
+    - "vocabulary": List of key words/phrasal verbs used in this sentence: [{"phrase": "word or phrasal verb", "tr": "Türkçe anlamı"}].
+
+--- CASE 2: The input is an ENGLISH word (e.g., "anticipate", "arrival", "emergence") ---
+If the word is English, set "isTurkishInput" to false in your response.
+Generate:
+- "wordInfo": {
+    "word": "${word}",
+    "pos": "part of speech (noun, verb, adjective, etc.)",
+    "phonetics": "IPA pronunciation (e.g., /æn'tɪs.ɪ.peɪt/)",
+    "trPronunciation": "Approximation of how to pronounce it in Turkish spelling (e.g., en-ti-si-peyt)",
+    "trMeaning": "Direct Turkish translation/meanings of the word",
+    "usageDifference": "A detailed explanation in Turkish about the usage context, nuances, and how it differs from close synonyms or commonly confused words (e.g., explaining arrival vs advent)."
+  }
+- "simple": Exactly 7 sentences (A1-A2 level) containing "${word}". Each with "eng", "tr", "analysis", and "vocabulary" array.
+- "medium": Exactly 7 sentences (B1-B2 level) containing "${word}". Each with "eng", "tr", "analysis", and "vocabulary" array.
+- "academic": Exactly 7 sentences (C1-C2 level) containing "${word}". Each with "eng", "tr", "analysis", and "vocabulary" array.
+
+Output MUST be a raw JSON object matching the corresponding case schema. Do not write markdown block. Return only the raw JSON.`;
 
   const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 

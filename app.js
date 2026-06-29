@@ -148,11 +148,19 @@ let appState = {
 const searchInput = document.getElementById('search-input');
 const searchBtn = document.getElementById('search-btn');
 const clearSearchBtn = document.getElementById('clear-search-btn');
+const modeDictionaryBtn = document.getElementById('mode-dictionary-btn');
+const modeConversationBtn = document.getElementById('mode-conversation-btn');
+const dictionaryView = document.getElementById('dictionary-view');
+const conversationView = document.getElementById('conversation-view');
+const convPhrasesList = document.getElementById('conv-phrases-list');
 const wordInfoCard = document.getElementById('word-info-card');
 const infoWordName = document.getElementById('info-word-name');
 const infoWordPos = document.getElementById('info-word-pos');
 const infoWordPhonetics = document.getElementById('info-word-phonetics');
+const infoWordTrPhonetics = document.getElementById('info-word-tr-phonetics');
 const infoWordMeaning = document.getElementById('info-word-meaning');
+const infoWordUsage = document.getElementById('info-word-usage');
+const infoWordUsageWrapper = document.getElementById('info-word-usage-wrapper');
 const pronounceWordBtn = document.getElementById('pronounce-word-btn');
 const historyList = document.getElementById('history-list');
 
@@ -401,6 +409,21 @@ function setupEventListeners() {
     });
   });
 
+  // View mode navigation
+  modeDictionaryBtn.addEventListener('click', () => switchViewMode('dictionary'));
+  modeConversationBtn.addEventListener('click', () => switchViewMode('conversation'));
+  
+  // Conversation Category Tabs
+  const convCatTabs = document.querySelectorAll('.conv-cat-tab');
+  convCatTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      convCatTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const cat = tab.getAttribute('data-cat');
+      renderConversationPhrases(cat);
+    });
+  });
+
   // Tabs navigation
   tabLinks.forEach(tab => {
     tab.addEventListener('click', () => {
@@ -471,15 +494,13 @@ async function performSearch(word) {
   const isOnline = navigator.onLine;
 
   try {
-    // Fetch Dictionary Info first (Async background, doesn't block UI)
-    fetchDictionaryInfo(word);
-
     // Mode determination
     if (!isOnline) {
-      // Offline mode
+      // Offline mode: Load word info and sentences from local DB
+      fetchDictionaryInfo(word);
       loadOfflineWord(word);
     } else {
-      // Online Mode: always generate via Gemini
+      // Online Mode: always generate via Gemini (which returns both sentences and wordInfo)
       await generateGeminiSentences(word);
     }
   } catch (err) {
@@ -545,11 +566,27 @@ async function fetchDictionaryInfo(word) {
   }
 }
 
-function displayWordInfo(word, pos, phonetics, definition) {
+function displayWordInfo(word, pos, phonetics, definition, trPronunciation = '', usageDifference = '') {
   infoWordName.textContent = word;
   infoWordPos.textContent = pos;
   infoWordPhonetics.textContent = phonetics;
+  
+  if (trPronunciation) {
+    infoWordTrPhonetics.textContent = `[Okunuşu: ${trPronunciation}]`;
+    infoWordTrPhonetics.classList.remove('hidden');
+  } else {
+    infoWordTrPhonetics.classList.add('hidden');
+  }
+  
   infoWordMeaning.textContent = definition;
+  
+  if (usageDifference) {
+    infoWordUsage.textContent = usageDifference;
+    infoWordUsageWrapper.classList.remove('hidden');
+  } else {
+    infoWordUsageWrapper.classList.add('hidden');
+  }
+  
   wordInfoCard.classList.remove('hidden');
 }
 
@@ -615,28 +652,91 @@ async function generateGeminiSentences(word) {
   
   const aiData = await response.json();
   
-  // Render AI Sentences
-  if (aiData.simple && aiData.simple.length > 0) {
-    aiData.simple.forEach(s => addSentenceCard(simpleList, s.eng, s.tr, 'simple-card', s.analysis));
-  } else {
-    showNoResults(simpleList);
+  // Render Word Info Card from Gemini Metadata (English Searches)
+  if (!aiData.isTurkishInput && aiData.wordInfo) {
+    displayWordInfo(
+      aiData.wordInfo.word || word,
+      aiData.wordInfo.pos || '',
+      aiData.wordInfo.phonetics || '',
+      aiData.wordInfo.trMeaning || '',
+      aiData.wordInfo.trPronunciation || '',
+      aiData.wordInfo.usageDifference || ''
+    );
   }
+
+  // Clear lists first
+  simpleList.innerHTML = '';
+  mediumList.innerHTML = '';
+  academicList.innerHTML = '';
   
-  if (aiData.medium && aiData.medium.length > 0) {
-    aiData.medium.forEach(s => addSentenceCard(mediumList, s.eng, s.tr, 'medium-card', s.analysis));
+  // Render search results based on input language
+  if (aiData.isTurkishInput) {
+    // Hide the level selection tabs because we are showing context groupings instead
+    document.querySelector('.tabs-container').classList.add('hidden');
+    
+    // Render wordInfo card for the Turkish word
+    displayWordInfo(
+      word,
+      'Türkçe Kelime',
+      '',
+      `İngilizce Karşılıkları: ${aiData.usages ? aiData.usages.map(u => u.englishWord).join(', ') : ''}`,
+      '',
+      `"${word}" kelimesinin İngilizce karşılıkları farklı kullanım amaçlarına göre aşağıda gruplandırılmıştır.`
+    );
+    
+    if (aiData.usages && aiData.usages.length > 0) {
+      aiData.usages.forEach(usage => {
+        const usageCard = document.createElement('div');
+        usageCard.className = 'usage-group-card';
+        
+        const usageHeader = document.createElement('div');
+        usageHeader.className = 'usage-group-header';
+        usageHeader.innerHTML = `
+          <span class="usage-eng-word">${usage.englishWord}</span>
+          <span class="usage-tr-context">${usage.contextName}</span>
+        `;
+        usageCard.appendChild(usageHeader);
+        
+        const sentencesList = document.createElement('div');
+        sentencesList.className = 'usage-sentences-list';
+        
+        usage.sentences.forEach(s => {
+          addSentenceCard(sentencesList, s.eng, s.tr, 'medium-card', s.analysis, s.vocabulary);
+        });
+        
+        usageCard.appendChild(sentencesList);
+        simpleList.appendChild(usageCard);
+      });
+    } else {
+      showNoResults(simpleList);
+    }
   } else {
-    showNoResults(mediumList);
-  }
-  
-  if (aiData.academic && aiData.academic.length > 0) {
-    aiData.academic.forEach(s => addSentenceCard(academicList, s.eng, s.tr, 'academic-card', s.analysis));
-  } else {
-    showNoResults(academicList);
+    // English input: make sure levels tabs container is visible
+    document.querySelector('.tabs-container').classList.remove('hidden');
+    
+    // Render AI Sentences
+    if (aiData.simple && aiData.simple.length > 0) {
+      aiData.simple.forEach(s => addSentenceCard(simpleList, s.eng, s.tr, 'simple-card', s.analysis, s.vocabulary));
+    } else {
+      showNoResults(simpleList);
+    }
+    
+    if (aiData.medium && aiData.medium.length > 0) {
+      aiData.medium.forEach(s => addSentenceCard(mediumList, s.eng, s.tr, 'medium-card', s.analysis, s.vocabulary));
+    } else {
+      showNoResults(mediumList);
+    }
+    
+    if (aiData.academic && aiData.academic.length > 0) {
+      aiData.academic.forEach(s => addSentenceCard(academicList, s.eng, s.tr, 'academic-card', s.analysis, s.vocabulary));
+    } else {
+      showNoResults(academicList);
+    }
   }
 }
 
 // --- Card Renderer Helpers ---
-function addSentenceCard(container, eng, tr, cardClass, analysis = '') {
+function addSentenceCard(container, eng, tr, cardClass, analysis = '', vocabulary = []) {
   const card = document.createElement('div');
   card.className = `sentence-card ${cardClass}`;
   
@@ -695,6 +795,20 @@ function addSentenceCard(container, eng, tr, cardClass, analysis = '') {
     card.appendChild(analysisBlock);
   }
   
+  // Add Vocabulary / Phrasal Verbs block if present
+  if (vocabulary && vocabulary.length > 0) {
+    const vocabBlock = document.createElement('div');
+    vocabBlock.className = 'sentence-vocab-block';
+    
+    let vocabItemsHTML = '';
+    vocabulary.forEach(item => {
+      vocabItemsHTML += `<span class="vocab-item-tag"><strong>${item.phrase}</strong>: ${item.tr}</span>`;
+    });
+    
+    vocabBlock.innerHTML = `📚 <strong>Kelime & Deyimler:</strong> ${vocabItemsHTML}`;
+    card.appendChild(vocabBlock);
+  }
+  
   card.appendChild(actionRow);
   
   // Tap card to speak as secondary feature on tablets
@@ -710,4 +824,148 @@ function showNoResults(container) {
     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="8" y1="12" x2="16" y2="12"></line></svg>
     <p>Bu seviye için eşleşen örnek cümle bulunamadı.</p>
   </div>`;
+}
+
+// --- Everyday Conversation Practice Database ---
+const CONVERSATION_DB = {
+  greeting: [
+    { eng: "How have you been lately?", tr: "Son zamanlarda nasılsın / nasıl gidiyor?" },
+    { eng: "It's a pleasure to meet you.", tr: "Sizinle tanışmak bir zevk." },
+    { eng: "Long time no see! What's new?", tr: "Görüşmeyeli uzun zaman oldu! Ne haber?" },
+    { eng: "Could you tell me a bit about yourself?", tr: "Bana kendinizden biraz bahsedebilir misiniz?" },
+    { eng: "I'd like you to meet my friend.", tr: "Sizi arkadaşımla tanıştırmak isterim." },
+    { eng: "Let's keep in touch.", tr: "İletişimde kalalım." },
+    { eng: "I've heard a lot about you.", tr: "Hakkınızda çok şey duydum." },
+    { eng: "What do you do for a living?", tr: "Geçiminizi sağlamak için ne iş yapıyorsunuz?" },
+    { eng: "It was nice catching up with you.", tr: "Seninle laflamak / arayı kapatmak güzeldi." },
+    { eng: "Have a good one!", tr: "İyi günler! / İyi çalışmalar!" }
+  ],
+  shopping: [
+    { eng: "Could you tell me where the fitting rooms are?", tr: "Kabinlerin nerede olduğunu söyler misiniz?" },
+    { eng: "Does this shirt come in a different color?", tr: "Bu gömleğin başka bir rengi var mı?" },
+    { eng: "Can I pay by credit card?", tr: "Kredi kartıyla ödeyebilir miyim?" },
+    { eng: "Is this item on sale?", tr: "Bu ürün indirimde mi?" },
+    { eng: "I'm just browsing, thank you.", tr: "Sadece bakınıyorum, teşekkürler." },
+    { eng: "Can I return this if it doesn't fit?", tr: "Olmazsa bunu iade edebilir miyim?" },
+    { eng: "Do you have this in a size medium?", tr: "Bunun medium bedeni var mı?" },
+    { eng: "Keep the change.", tr: "Üstü kalsın." },
+    { eng: "Could I get a receipt, please?", tr: "Fiş alabilir miyim lütfen?" },
+    { eng: "It's a bit out of my budget.", tr: "Bütçemi biraz aşıyor." }
+  ],
+  travel: [
+    { eng: "Could you tell me which platform the train leaves from?", tr: "Trenin hangi perondan kalktığını söyler misiniz?" },
+    { eng: "Is there a shuttle service to the airport?", tr: "Havalimanına servis hizmeti var mı?" },
+    { eng: "Check-in for flight TK1920 is now open.", tr: "TK1920 sefer sayılı uçuş için kayıtlar açıldı." },
+    { eng: "Could you recommend a good local restaurant nearby?", tr: "Yakınlarda güzel bir yerel restoran önerebilir misiniz?" },
+    { eng: "Where can I purchase a ticket?", tr: "Nereden bilet satın alabilirim?" },
+    { eng: "Excuse me, how do I get to the city center?", tr: "Affedersiniz, şehir merkezine nasıl giderim?" },
+    { eng: "Can you hold my luggage for a few hours?", tr: "Bagajımı birkaç saatliğine tutabilir misiniz?" },
+    { eng: "A single/return ticket to London, please.", tr: "Londra'ya tek yön/gidiş-dönüş bir bilet lütfen." },
+    { eng: "Is the breakfast included in the room rate?", tr: "Kahvaltı oda fiyatına dahil mi?" },
+    { eng: "Excuse me, is this seat taken?", tr: "Affedersiniz, bu koltuk boş mu?" }
+  ],
+  school: [
+    { eng: "When is the deadline for this assignment?", tr: "Bu ödevin son teslim tarihi ne zaman?" },
+    { eng: "Could you explain this topic one more time, please?", tr: "Bu konuyu bir kez daha açıklayabilir misiniz lütfen?" },
+    { eng: "Are we allowed to use our notes during the test?", tr: "Sınav sırasında notlarimizi kullanmamıza izin var mı?" },
+    { eng: "Who is presenting their project today?", tr: "Bugün projesini kim sunuyor?" },
+    { eng: "I need to catch up on my classes.", tr: "Derslerimi yakalamam/telafi etmem gerekiyor." },
+    { eng: "Let's form a study group for the final exam.", tr: "Final sınavı için bir çalışma grubu kuralım." },
+    { eng: "Could I borrow your pen for a moment?", tr: "Kalemini bir anlığına ödünç alabilir miyim?" },
+    { eng: "I didn't quite get that part.", tr: "O kısmı pek anlayamadım." },
+    { eng: "He passed the course with flying colors.", tr: "Dersi üstün başarıyla (yüksek notla) geçti." },
+    { eng: "Is attendance mandatory for this lecture?", tr: "Bu ders için katılım zorunlu mu?" }
+  ],
+  work: [
+    { eng: "Let's schedule a meeting to discuss the details.", tr: "Detayları tartışmak için bir toplantı planlayalım." },
+    { eng: "I am currently working on the budget report.", tr: "Şu anda bütçe raporu üzerinde çalışıyorum." },
+    { eng: "Could you give me some feedback on this draft?", tr: "Bu taslak hakkında bana geri bildirim verebilir misiniz?" },
+    { eng: "We need to meet the deadline by Friday.", tr: "Cuma gününe kadar teslim tarihini yakalamamız gerekiyor." },
+    { eng: "I'll follow up on this issue tomorrow morning.", tr: "Bu konuyu yarın sabah takip edeceğim." },
+    { eng: "Let's brainstorm some ideas for the project.", tr: "Proje için biraz beyin fırtınası yapalım." },
+    { eng: "Can we push the meeting back to 2 PM?", tr: "Toplantıyı öğleden sonra 2'ye erteleyebilir miyiz?" },
+    { eng: "I'd like to sign off on this proposal.", tr: "Bu teklifi onaylamak/imzalamak istiyorum." },
+    { eng: "Who is in charge of this account?", tr: "Bu hesaptan kim sorumlu?" },
+    { eng: "We need to delegate these tasks immediately.", tr: "Bu görevleri hemen delege etmemiz/dağıtmamız gerekiyor." }
+  ],
+  park: [
+    { eng: "It's a beautiful day to go for a jog in the park.", tr: "Parkta koşuya çıkmak için harika bir gün." },
+    { eng: "Is it okay if I pet your dog?", tr: "Köpeğinizi sevebilir miyim?" },
+    { eng: "Let's find a shady spot to have a picnic.", tr: "Piknik yapmak için gölgelik bir yer bulalım." },
+    { eng: "The park is filled with blooming flowers in spring.", tr: "Park, baharda açan çiçeklerle doludur." },
+    { eng: "Excuse me, is there a public restroom nearby?", tr: "Affedersiniz, yakınlarda umumi tuvalet var mı?" },
+    { eng: "Let's sit on the bench and get some fresh air.", tr: "Bankta oturup biraz temiz hava alalım." },
+    { eng: "Watch out! The path is a bit slippery.", tr: "Dikkat et! Yol biraz kaygan." },
+    { eng: "The kids are playing on the swings and slides.", tr: "Çocuklar salıncaklarda ve kaydıraklarda oynuyor." },
+    { eng: "Do you want to go for a stroll around the lake?", tr: "Gölün etrafında bir yürüyüşe çıkmak ister miydin?" },
+    { eng: "It's getting chilly; we should head back.", tr: "Hava soğuyor; geri dönmeliyiz." }
+  ]
+};
+
+// --- View Switching and Rendering Helpers ---
+function switchViewMode(mode) {
+  if (mode === 'dictionary') {
+    modeDictionaryBtn.classList.add('active');
+    modeConversationBtn.classList.remove('active');
+    dictionaryView.classList.remove('hidden');
+    conversationView.classList.add('hidden');
+  } else {
+    modeDictionaryBtn.classList.remove('active');
+    modeConversationBtn.classList.add('active');
+    dictionaryView.classList.add('hidden');
+    conversationView.classList.remove('hidden');
+    
+    // Load active category
+    const activeCatTab = document.querySelector('.conv-cat-tab.active');
+    const cat = activeCatTab ? activeCatTab.getAttribute('data-cat') : 'greeting';
+    renderConversationPhrases(cat);
+  }
+}
+
+function renderConversationPhrases(category) {
+  convPhrasesList.innerHTML = '';
+  const phrases = CONVERSATION_DB[category] || [];
+  
+  if (phrases.length === 0) {
+    convPhrasesList.innerHTML = '<p class="history-empty">Bu kategoriye ait cümle bulunamadı.</p>';
+    return;
+  }
+  
+  phrases.forEach(p => {
+    const card = document.createElement('div');
+    card.className = 'conv-phrase-card';
+    
+    const content = document.createElement('div');
+    content.className = 'conv-phrase-content';
+    
+    const engPara = document.createElement('p');
+    engPara.className = 'conv-phrase-eng';
+    engPara.textContent = p.eng;
+    
+    const trPara = document.createElement('p');
+    trPara.className = 'conv-phrase-tr';
+    trPara.textContent = p.tr;
+    
+    content.appendChild(engPara);
+    content.appendChild(trPara);
+    
+    const playBtn = document.createElement('button');
+    playBtn.className = 'icon-action-btn';
+    playBtn.title = 'Seslendir';
+    playBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`;
+    playBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      speakText(p.eng);
+    });
+    
+    card.appendChild(content);
+    card.appendChild(playBtn);
+    
+    // Tap card to speak as secondary feature on tablets
+    card.addEventListener('click', () => {
+      speakText(p.eng);
+    });
+    
+    convPhrasesList.appendChild(card);
+  });
 }
