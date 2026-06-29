@@ -46,6 +46,10 @@
             <span class="version-tag">Tablet v1.0</span>
           </div>
         </div>
+        <!-- Settings button for mobile portrait -->
+        <button id="settings-toggle-btn-mobile" class="settings-btn-mobile" aria-label="Ayarlar">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        </button>
       </div>
       
       <!-- Navigation Modes -->
@@ -170,6 +174,14 @@
           
           <!-- Welcome Screen -->
           <div id="welcome-screen" class="welcome-screen">
+            <!-- iOS Install Banner (Hidden by default, shown via JS) -->
+            <div id="ios-install-banner" class="ios-install-banner hidden">
+              <span class="banner-icon">📱</span>
+              <div class="banner-text">
+                <strong>iPhone'a Yükleyin:</strong> Tarayıcınızın <strong>Paylaş (Share)</strong> butonuna dokunup <strong>"Ana Ekrana Ekle"</strong> seçeneğini seçerek bu uygulamayı normal bir program gibi telefonunuza yükleyebilirsiniz.
+              </div>
+              <button class="banner-close-btn" onclick="this.parentElement.remove()" aria-label="Kapat">×</button>
+            </div>
             <div class="welcome-icon">
               <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg>
             </div>

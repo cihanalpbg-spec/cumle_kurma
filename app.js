@@ -199,6 +199,14 @@ window.addEventListener('DOMContentLoaded', () => {
   setupEventListeners();
   checkOnlineStatus();
   
+  // Show iOS PWA banner if applicable
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+  const iosInstallBanner = document.getElementById('ios-install-banner');
+  if (isIOS && !isStandalone && iosInstallBanner) {
+    iosInstallBanner.classList.remove('hidden');
+  }
+  
   // Register service worker for PWA
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js')
@@ -436,10 +444,19 @@ function setupEventListeners() {
   });
 
   // Settings modal toggles
-  settingsToggleBtn.addEventListener('click', () => {
+  const openSettings = () => {
     loadSettings();
     settingsModal.classList.remove('hidden');
-  });
+  };
+
+  if (settingsToggleBtn) {
+    settingsToggleBtn.addEventListener('click', openSettings);
+  }
+
+  const settingsToggleBtnMobile = document.getElementById('settings-toggle-btn-mobile');
+  if (settingsToggleBtnMobile) {
+    settingsToggleBtnMobile.addEventListener('click', openSettings);
+  }
 
   settingsCloseBtn.addEventListener('click', () => {
     settingsModal.classList.add('hidden');
