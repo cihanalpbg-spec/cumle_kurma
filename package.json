@@ -1,0 +1,11 @@
+{
+  "name": "cumle-bulucu-tablet",
+  "version": "1.0.0",
+  "description": "Cümle Bulucu Tablet Uygulaması",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {}
+}

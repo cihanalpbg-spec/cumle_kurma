@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7F00FF" />
+      <stop offset="50%" stop-color="#E100FF" />
+      <stop offset="100%" stop-color="#00F2FE" />
+    </linearGradient>
+    
+    <!-- Icon Elements Gradient -->
+    <linearGradient id="elem-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#e0e0e0" />
+    </linearGradient>
+
+    <!-- Drop Shadow for realism -->
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="16" stdDeviation="16" flood-color="#000000" flood-opacity="0.3" />
+    </filter>
+  </defs>
+
+  <!-- Rounded App Icon Background -->
+  <rect x="32" y="32" width="448" height="448" rx="96" fill="url(#bg-grad)" filter="url(#shadow)" />
+
+  <!-- Inner border for premium look -->
+  <rect x="34" y="34" width="444" height="444" rx="94" fill="none" stroke="#ffffff" stroke-width="4" stroke-opacity="0.15" />
+
+  <!-- Speech bubble representing sentences -->
+  <path d="M150,140 L362,140 C388.5,140 410,161.5 410,188 L410,296 C410,322.5 388.5,344 362,344 L290,344 L200,400 L200,344 L150,344 C123.5,344 102,322.5 102,296 L102,188 C102,161.5 123.5,140 150,140 Z" 
+        fill="#ffffff" fill-opacity="0.15" />
+
+  <!-- A and Cümle representation (Grammar & Learning) -->
+  <!-- A Letter symbol -->
+  <text x="210" y="270" font-family="system-ui, -apple-system, sans-serif" font-size="110" font-weight="900" fill="#ffffff" text-anchor="middle" filter="url(#shadow)">A</text>
+  <!-- Turkish sentence symbol (C) -->
+  <text x="310" y="300" font-family="system-ui, -apple-system, sans-serif" font-size="80" font-weight="900" fill="#00F2FE" text-anchor="middle" filter="url(#shadow)">C</text>
+
+  <!-- Magnifying glass search indicator, wraps around -->
+  <circle cx="330" cy="310" r="45" fill="none" stroke="#ffffff" stroke-width="14" filter="url(#shadow)" />
+  <line x1="362" y1="342" x2="400" y2="380" stroke="#ffffff" stroke-width="14" stroke-linecap="round" filter="url(#shadow)" />
+</svg>

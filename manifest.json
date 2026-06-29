@@ -1,0 +1,25 @@
+{
+  "name": "Cümle Bulucu - Tablet Versiyonu",
+  "short_name": "Cümle Bulucu",
+  "description": "Kelime aramaları ile İngilizce cümle yapılarını basitten akademik seviyeye kadar öğrenin.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0d0e15",
+  "theme_color": "#7F00FF",
+  "categories": ["education", "books"],
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

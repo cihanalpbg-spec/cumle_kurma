@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Cümle Bulucu - İngilizce Seviye Geliştirici (Tablet)</title>
+  
+  <!-- PWA Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Cümle Bulucu">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0d0e15">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Background Gradients -->
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+
+  <!-- Offline Status Bar -->
+  <div id="offline-bar" class="offline-bar hidden">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"></line><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path><path d="M10.71 5.05A16 16 0 0 1 22.58 9"></path><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>
+    <span>Çevrimdışı Mod etkin. Yerel sözlük kelimelerini arayabilirsiniz.</span>
+  </div>
+
+  <!-- Main Container -->
+  <div class="app-container">
+    
+    <!-- Sidebar / Navigation Panel -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <img src="icon.svg" alt="Logo" class="logo-img">
+          <div>
+            <h1>Cümle Bulucu</h1>
+            <span class="version-tag">Tablet v1.0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search Section -->
+      <div class="search-box">
+        <div class="search-input-wrapper">
+          <input type="text" id="search-input" placeholder="İngilizce bir kelime yazın..." autocomplete="off">
+          <button id="clear-search-btn" class="clear-btn hidden" aria-label="Temizle">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <button id="search-btn" class="primary-btn">
+          <span>Cümle Bul</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
+      </div>
+
+      <!-- Word Info Card -->
+      <div id="word-info-card" class="word-info-card hidden">
+        <div class="word-title-row">
+          <h2 id="info-word-name">Word</h2>
+          <span id="info-word-pos" class="pos-badge">noun</span>
+        </div>
+        <p id="info-word-phonetics" class="phonetics">/wɜːd/</p>
+        <p id="info-word-meaning" class="meaning">Bir kelimenin anlamı burada yer alacak.</p>
+        <div class="card-footer-actions">
+          <button id="pronounce-word-btn" class="icon-action-btn" title="Kelimeyi Oku">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- History & Saved Panel -->
+      <div class="history-panel">
+        <div class="panel-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          <span>Son Aramalar</span>
+        </div>
+        <ul id="history-list" class="history-list">
+          <!-- Dynamically populated -->
+          <li class="history-empty">Henüz arama yapılmadı.</li>
+        </ul>
+      </div>
+
+      <!-- Settings Access Button -->
+      <div class="sidebar-footer">
+        <button id="settings-toggle-btn" class="settings-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          <span>Ayarlar</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      
+      <!-- Word Header / Status -->
+      <header class="content-header">
+        <div id="results-header" class="hidden">
+          <div class="active-word-info">
+            <span class="label">Aranan Kelime:</span>
+            <h2 id="active-word-title">apple</h2>
+          </div>
+          <p id="sentences-count" class="count-tag">12 Örnek Cümle Bulundu</p>
+        </div>
+        <div id="welcome-header">
+          <h2>Hoş Geldiniz</h2>
+          <p>Öğrenmek istediğiniz kelimeyi soldaki arama kutusuna yazarak başlayabilirsiniz.</p>
+        </div>
+      </header>
+
+      <!-- Level Selection Tabs -->
+      <section class="tabs-container">
+        <button class="tab-link active" data-tab="level-simple">
+          <span class="level-indicator simple"></span>
+          <div class="tab-label-group">
+            <span class="tab-title">Basit Seviye</span>
+            <span class="tab-desc">A1 - A2 Cümleleri</span>
+          </div>
+        </button>
+        <button class="tab-link" data-tab="level-medium">
+          <span class="level-indicator medium"></span>
+          <div class="tab-label-group">
+            <span class="tab-title">Orta Seviye</span>
+            <span class="tab-desc">B1 - B2 Cümleleri</span>
+          </div>
+        </button>
+        <button class="tab-link" data-tab="level-academic">
+          <span class="level-indicator academic"></span>
+          <div class="tab-label-group">
+            <span class="tab-title">Akademik Seviye</span>
+            <span class="tab-desc">C1 - C2 / Karmaşık Yapılar</span>
+          </div>
+        </button>
+      </section>
+
+      <!-- Sentences Display Lists -->
+      <section class="sentences-view-area">
+        
+        <!-- Welcome Screen -->
+        <div id="welcome-screen" class="welcome-screen">
+          <div class="welcome-icon">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg>
+          </div>
+          <h3>Yeni Bir Kelime Arayın</h3>
+          <p>İngilizce bir kelime girerek örnek cümleleri seviyelerine göre inceleyebilirsiniz. İngilizce cümledeki kelimelerin üzerine tıklayarak o kelimenin de anlamına anında bakabilirsiniz.</p>
+          <div class="quick-tags">
+            <span>Örnekler:</span>
+            <button class="tag-btn">develop</button>
+            <button class="tag-btn">academic</button>
+            <button class="tag-btn">influence</button>
+            <button class="tag-btn">essential</button>
+          </div>
+        </div>
+
+        <!-- Loader -->
+        <div id="sentences-loader" class="loader-container hidden">
+          <div class="spinner"></div>
+          <p>Cümleler analiz ediliyor ve derecelendiriliyor...</p>
+        </div>
+
+        <!-- Level Lists -->
+        <div id="level-simple" class="tab-content active">
+          <div class="sentences-list" id="simple-list">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <div id="level-medium" class="tab-content">
+          <div class="sentences-list" id="medium-list">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <div id="level-academic" class="tab-content">
+          <div class="sentences-list" id="academic-list">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+      </section>
+    </main>
+
+  </div>
+
+  <!-- Settings Modal (Glassmorphism Overlay) -->
+  <div id="settings-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Uygulama Ayarları</h2>
+        <button id="settings-close-btn" class="close-btn" aria-label="Kapat">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <!-- Voice Settings -->
+        <div class="settings-group">
+          <h3>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+            <span>Ses ve Telaffuz</span>
+          </h3>
+          <div class="setting-item">
+            <label for="voice-select">Ses Seçimi (TTS)</label>
+            <select id="voice-select">
+              <!-- Populated by JS -->
+              <option value="">Varsayılan Tarayıcı Sesi</option>
+            </select>
+          </div>
+          <div class="setting-item">
+            <label for="voice-speed">Konuşma Hızı: <span id="speed-val">1.0x</span></label>
+            <input type="range" id="voice-speed" min="0.5" max="2.0" step="0.1" value="1.0">
+          </div>
+        </div>
+
+        <!-- Optional Gemini AI Settings -->
+        <div class="settings-group">
+          <h3>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+            <span>Yapay Zeka (Gemini) Desteği</span>
+          </h3>
+          <p class="settings-help-text">Bu alan tamamen opsiyoneldir. Gemini API anahtarı ekleyerek kelimelere özel detaylı yapay zeka cümleleri ve dil bilgisi analizleri üretebilirsiniz. Boş bırakırsanız standart arama motoru çalışır.</p>
+          <div class="setting-item">
+            <label class="toggle-container">
+              <input type="checkbox" id="gemini-enabled">
+              <span class="checkmark"></span>
+              Yapay Zekayı Aktif Et
+            </label>
+          </div>
+          <div id="gemini-key-wrapper" class="setting-item hidden">
+            <label for="gemini-key">Gemini API Anahtarı</label>
+            <input type="password" id="gemini-key" placeholder="AI Studio'dan aldığınız API anahtarını buraya girin...">
+            <span class="input-helper"><a href="https://aistudio.google.com/" target="_blank" rel="noopener">Ücretsiz API anahtarı almak için tıklayın</a></span>
+          </div>
+        </div>
+
+        <!-- About Section -->
+        <div class="settings-group about-group">
+          <h3>Hakkında</h3>
+          <p>Cümle Bulucu Tablet uygulaması, İngilizce kelimelerin farklı bağlamlardaki kullanım zorluklarını analiz ederek kelime dağarcığınızı ve gramer bilginizi genişletmek amacıyla tasarlanmıştır.</p>
+          <p class="offline-ready-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Çevrimdışı Çalışmaya Hazır (PWA)
+          </p>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button id="settings-save-btn" class="primary-btn">Kaydet ve Kapat</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Javascript -->
+  <script src="app.js"></script>
+</body>
+</html>
