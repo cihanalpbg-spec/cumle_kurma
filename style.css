@@ -238,6 +238,29 @@ body {
   flex-direction: column;
   gap: 8px;
   animation: slideUp 0.3s ease-out;
+  
+  /* Scrollbar & height restrictions for tablets */
+  max-height: 320px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+.word-info-card::-webkit-scrollbar {
+  width: 6px;
+}
+
+.word-info-card::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.word-info-card::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+
+.word-info-card::-webkit-scrollbar-thumb:hover {
+  background: var(--secondary);
 }
 
 .word-info-card.hidden {

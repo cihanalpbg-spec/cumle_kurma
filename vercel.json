@@ -1,23 +1,20 @@
 {
+  "version": 2,
   "cleanUrls": true,
-  "headers": [
+  "routes": [
     {
-      "source": "/sw.js",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=0, must-revalidate"
-        }
-      ]
+      "src": "/sw.js",
+      "headers": { "cache-control": "public, max-age=0, must-revalidate" },
+      "dest": "/sw.js"
     },
     {
-      "source": "/manifest.json",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=0, must-revalidate"
-        }
-      ]
+      "src": "/manifest.json",
+      "headers": { "cache-control": "public, max-age=0, must-revalidate" },
+      "dest": "/manifest.json"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
     }
   ]
 }
